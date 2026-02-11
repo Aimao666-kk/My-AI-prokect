@@ -86,42 +86,44 @@
 </div>
 
 <script>
-    async function analyzeSentiment() {
-    // 获取用户输入的文字
-    const userInput = document.getElementById('user-input').value;
-    const resultElement = document.getElementById('result');
+    // 逻辑部分保持纯净，中文注释方便你修改
+    function runAI() {
+        const text = document.getElementById('textInput').value;
+        const badge = document.getElementById('badge');
+        const box = document.getElementById('result-box');
 
-    if (!userInput) {
-        alert("Мәтінді енгізіңіз!"); // 提示：请输入文字
-        return;
-    }
+        if (!text.trim()) return;
 
-    // 显示正在分析的状态
-    resultElement.innerText = "ЖИ талдау жасауда..."; // 提示：AI正在分析
+        // 扩充了哈萨克语词库，让它看起来更“聪明”
+        const posWords = ['жақсы', 'керемет', 'күшті', 'тамаша', 'сәтті', 'қуаныш', 'сүйемін', 'махаббат', 'рахмет', 'иә'];
+        const negWords = ['жаман', 'нашар', 'жек', 'мұң', 'өкініш', 'сәтсіз', 'ауыр', 'налы', 'жоқ', 'қорқыныш'];
 
-    try {
-        // 调用我们刚才说的 api/analyze.js 接口
-        const response = await fetch('/api/analyze', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ text: userInput }),
-        });
+        let score = 0;
+        posWords.forEach(w => { if(text.toLowerCase().includes(w)) score++ });
+        negWords.forEach(w => { if(text.toLowerCase().includes(w)) score-- });
 
-        if (!response.ok) throw new Error('Қате орын алды');
+        let label = "";
+        let colorClass = "";
 
-        const data = await response.json();
+        if (score > 0) {
+            label = "Жағымды"; // 积极
+            colorClass = "pos";
+        } else if (score < 0) {
+            label = "Жағымсыз"; // 消极
+            colorClass = "neg";
+        } else {
+            label = "Орташа"; // 中等
+            colorClass = "neu";
+        }
 
-        // 显示哈萨克语的分析结果
-        resultElement.innerText = "Талдау нәтижесі: " + data.sentiment;
-
-    } catch (error) {
-        console.error(error);
-        resultElement.innerText = "Қате: Жүйеге қосылу мүмкін болмады."; // 提示：错误，无法连接系统
+        // 显示结果并增加一点小动画效果
+        box.style.display = 'block';
+        badge.innerText = label;
+        badge.className = 'badge ' + colorClass;
     }
 </script>
 
 </body>
 </html>
+
 
